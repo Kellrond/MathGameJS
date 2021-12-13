@@ -1,13 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Game</title>
-    <script src="math_game.js"></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+  <div class="container my-5 mx-5">
+    <div id="game-screen" class="card bg-warning shadow" style="width: 350px;">
+      <div id="equation-window" class="card m-4">
+        <div id="equation-line" class="m-3 fw-bold">
+          Equation line goes here
+        </div>
+      </div>
+      <div id="input-buttons" class="d-flex justify-content-center mx-5 mb-4">
+        <div class="btn-group-vertical">
+          <div class="btn-group btn-group-lg">
+            <button id="exit-btn" type="button" class="btn btn-secondary px-4">Exit</button>
+            <button id="duration-btn" type="button" class="btn btn-secondary px-4">Dur</button>
+            <button id="difficulty-btn" type="button" class="btn btn-secondary px-4">Diff</button>
+            <button id="go-btn" type="button" class="btn btn-secondary px-4">Go</button> 
+          </div>
+          <div class="btn-group btn-group-lg">
+            <button id="seven-btn" type="button" class="btn btn-secondary">7</button>
+            <button id="eight-btn" type="button" class="btn btn-secondary">8</button>
+            <button id="nine-btn" type="button" class="btn btn-secondary">9</button>
+            <button id="x1-btn" type="button" class="btn btn-secondary">x</button>            
+          </div>
+          <div class="btn-group btn-group-lg">
+            <button id="four-btn" type="button" class="btn btn-secondary">4</button>
+            <button id="five-btn" type="button" class="btn btn-secondary">5</button>
+            <button id="six-btn" type="button" class="btn btn-secondary">6</button>
+            <button id="x2-btn" type="button" class="btn btn-secondary">x</button>            
+          </div>
+          <div class="btn-group btn-group-lg">
+            <button id="one-btn" type="button" class="btn btn-secondary">1</button>
+            <button id="two-btn" type="button" class="btn btn-secondary">2</button>
+            <button id="three-btn" type="button" class="btn btn-secondary">3</button>
+            <button id="x3-btn" type="button" class="btn btn-secondary">x</button>            
+          </div>
+          <div class="btn-group">
+            <button id="dbl-zero-btn" type="button" class="btn btn-secondary px-4">0</button>
+            <button id="zero-btn" type="button" class="btn btn-secondary px-4">0</button>
+            <button id="dot-btn" type="button" class="btn btn-secondary px-4">.</button>
+            <button id="equals-btn" type="button" class="btn btn-secondary p-3">=</button>            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="math_game.js"></script>  
 </body>
 </html>
