@@ -18,137 +18,183 @@ const dotBtn = document.getElementById("dot-btn")
 const equalsBtn = document.getElementById("equals-btn")
 
 
+class Player {
+    constructor() {
+        this.name = "Jordan";
+        this.skill = 0;
+        this.preferences = {
+            operator: "add",
+            difficulty: 0.0
+        };
+        this.results = [];
+    }
 
+    set_name() {
+        this.name = prompt("Tell me your name and I'll give you your forture");
+    };
+    
+    set_difficulty() {
+        this.preferences.difficulty = parseFloat(prompt("What difficulty would you like to set as default?"))
+    };
 
-
-const player = {
-    name: "Jordan",
-    skill: 0,
-    preferences: {
-        operator: "add",
-        difficulty: 0.0
-    },
-    results:[],
-    set_name: function() {
-        player.name = prompt("Tell me your name and I'll give you your forture")
-    },
-    set_difficulty: function() {
-        player.preferences.difficulty = parseFloat(prompt("What difficulty would you like to set as default?"))
-    },
-    record_results: function() {
+    record_results() {
         console.log("Record results")
         //record results here
-    },
-    set_skill: function() {
+    };
+
+    set_skill() {
         //Sets skill based on previous results
-    }
+    };
+    
 };
 
-const game = {
-    duration_type: "rounds",
-    duration: 10,
-    difficulty: 0.0,
-    operators: ["add"],
-    player_input: 0,
-    results: 0,
-
-    start_game: function() {
-        console.log("Start game");
-
-        game.start_round();
-    },
-
-    start_round: function() {
-        console.log("Start round")
-        
-
-        game.next_question()
-        
-        //Start the multiquestion round
-    },
-    next_question: function() {
-        console.log("Next question")
-
-        game.evaluate_difficulty()
-        let question = quizMaster.generateEquation(game.difficulty) 
-
-        equationWindow.innerText = String(question.x) + " " + question.op + " "
-                + String(question.y) + " = " 
+class Game {
+    constructor() { 
+        this.duration_type = "rounds";
+        this.duration = 3,
+        this.difficulty = 0.0,
+        this.game_over = false,
+        this.operators = ['+'],
+        this.rounds_complete = 0,
+        this.round_question = {x: 0,y: 0,ans: 0, op: "+", str: "0 + 0 =&nbsp;", correct: true},
+        this.results = [];
+        this.init()
+    };
+    init = function () {
+        this.player_input = 0
+        this.buffer_input = ""
+    }
+    start_game = function() {
+        console.log(`--------------------------Start game. Duration: ${this.duration} ${this.duration_type}`);
+        this.start_next_round();  
+    };
 
 
-        game.input_answer()
-        console.log(game.player_input)
+    start_next_round = function() {
+        console.log(`------------------------------Start round. ${this.rounds_complete + 1} of ${this.duration} ${this.duration_type}`);
+        this.ask_question()     
+        this.input_answer()
+    };
+
+    ask_question = function() {
+        this.set_new_difficulty()
+        let newMaster = new QuizMaster()
+        this.round_question = newMaster.generateEquation(this.difficulty) 
+        equationWindow.innerHTML = this.round_question.str
+        console.log(`game.ask_question:         ${this.round_question.str}`)   
+          
+    };
 
 
-        console.log(question)
-        
-        // evaluate difficulty and send difficulty and operators to quiz master
+    set_new_difficulty = function() {
+        this.difficulty = 10
 
-    },
-    evaluate_difficulty: function() {
-        console.log("Evaluate difficulty")
-
-        game.difficulty = game.results
+        console.log(`game.evaluate_difficulty:  ${this.difficulty}`)
         //Look at results and set a difficulty for the next question. 
-    },
-    input_answer: function() {
-        console.log("Input answer");
-        let buffer_input = ""
-        let handler = function(event) {
-            if (event.charCode == 13) {
-                game.player_input = Number(buffer_input)
-                document.removeEventListener('keypress', handler)
-                return;
-            }
-            buffer_input += String.fromCharCode(event.charCode)
-            equationWindow.innerText += String.fromCharCode(event.charCode)
+    };
+
+    handler = function(event) {
+        if (event.charCode == 13 && this.buffer_input != "\r") {
+            document.removeEventListener('keypress', this.handler)
+            this.player_input = Number(this.buffer_input);
+            console.log(`input_answer:         ${this.player_input}`);
+            this.post_round()
+        };
+        if (this.buffer_input == " ") {this.buffer_input = ""};
+        this.buffer_input += String.fromCharCode(event.charCode);
+        equationWindow.innerHTML = this.round_question.str + this.buffer_input.replace(/(\r\n|\n|\r)/gm, ""); 
+    }.bind(this);
+
+    input_answer = function() {
+        document.addEventListener('keypress', this.handler)
+    };
+
+    post_round = function() {
+        this.check_answer()
+        this.record_question()
+        this.is_game_over()
+        if (!this.game_over) {
+            this.init()
+            this.start_next_round()
         }
-        document.addEventListener('keypress', handler)
-    },
-    check_answer: function() {
-        console.log("Check answer")
-        // evaluate input against the answer
-    },
-    record_question: function() {
-        console.log("Record_question")
-        // Record the users results in the results 
-    },
-    continue_play: function() {
+    };
+
+    check_answer = function() {
+        if (this.player_input === this.round_question.ans) {
+            this.round_question.correct = true
+        } else {
+            this.round_question.correct = false
+        }
+        console.log(`game.check_answer:         ${this.round_question.correct}`)
+    };
+
+
+    record_question = function() {
+        this.rounds_complete = this.results.push(this.round_question)
+        let log_results = Object.values(this.results[this.rounds_complete-1])
+        console.log(`game.record_question:      ${log_results}`)
+
+    };
+
+    is_game_over = function() {
+        
+        this.game_over = ((this.rounds_complete >= this.duration) ? true : false)
+        
+        console.log(`game.is_game_over:         ${this.game_over}`)
         // Check if game should still continue
-    }
+    };
 };
 
 
-const quizMaster = {
-    x: 0,
-    y: 0,
-    ans: 0,
-    generateEquation: function(difficulty) {
-        console.log("Generate equation")
-        quizMaster.gen_x(difficulty)
-        quizMaster.gen_y(difficulty)
-        quizMaster.check_answer_length()
+class QuizMaster {
+    constructor() {
+        this.x = 0,
+        this.y = 0,
+        this.op = ['+'],
+        this.ans = 0,
+        this.str = ""
+    }
 
-        return {x: quizMaster.x,y: quizMaster.y,ans: quizMaster.ans, op: "+"}
+    generateEquation = function(difficulty) {
+        console.log("quizMaster.generate_equation")
+        difficulty = 0
+        this.gen_x(difficulty)
+        this.gen_y(difficulty)
 
-    },
-    rand_int: function(range) {
+        this.check_answer_length()
+        this.write_equation_string()
+
+        return {x: this.x,y: this.y,ans: this.ans, op: "+", str: this.str, correct: false}
+
+    };
+
+    rand_int = function(range) {
         return parseInt(Math.random() * range);
-    },
-    gen_x: function(difficulty) {
-        quizMaster.x = quizMaster.rand_int(10 + difficulty)
-    },
-    gen_y: function(difficulty) {
-        quizMaster.y = quizMaster.rand_int(10 + difficulty)
-    },
-    check_answer_length: function() {
-        quizMaster.ans = quizMaster.x + quizMaster.y
+    };
+
+    gen_x = function(difficulty) {
+        while (this.x === 0){
+            this.x = this.rand_int(10 + difficulty)    
+        }  
+    };
+
+    gen_y = function(difficulty) {
+        while (this.y === 0) {
+            this.y = this.rand_int(10 + difficulty)
+        }
+    };
+
+    check_answer_length = function() {
+        let temp_eq_string = this.x + this.op[0] + this.y
+        this.ans = eval(temp_eq_string)
+    };
+
+    write_equation_string = function() {
+        this.str = `${this.x} ${this.op[0]} ${this.y} =&nbsp;`
     }
 };
 
 
-
-
-let new_game = game;
+let new_game = new Game();
 new_game.start_game()
 
