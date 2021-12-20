@@ -76,6 +76,7 @@ class Game {
 
     init_numeric_input = function() {
         console.log("game.init_numeric_input")
+        equalsBtn.innerText = 'Enter'
         oneBtn.onclick = function () {this.add_to_buffer("1")}.bind(this);
         twoBtn.onclick = function () {this.add_to_buffer("2")}.bind(this);
         threeBtn.onclick = function () {this.add_to_buffer("3")}.bind(this);
@@ -181,9 +182,10 @@ class Game {
 
     countdown_to_new_game = function() {
         console.log("game.countdown_to_new_game");
-        equalsBtn.removeAttribute("onclick");
+        equalsBtn.onclick = null
         let countdown_text = [".", ".", ".", "2", ".", ".", ".", "1", ".", ".", ".", " GO! ", ""];
         equationWindow.innerText = "Ready? ";
+        this.disable_numeric_input()
         
         setTimeout( function() { 
             equationWindow.innerText = "3";
@@ -200,6 +202,7 @@ class Game {
 
     start_next_round = function() {
         console.log(`------------------------------Start round. ${this.rounds_complete + 1} of ${this.duration} ${this.duration_type}`);
+
         this.update_scoreboard()
         this.ask_question() 
         this.input_answer()
@@ -240,7 +243,7 @@ class Game {
     };
 
     set_new_difficulty = function() {
-        this.difficulty = 10
+        this.difficulty = 10 + this.count_correct()
 
         console.log(`game.evaluate_difficulty:      ${this.difficulty}`)
         //Look at results and set a difficulty for the next question. 
@@ -305,7 +308,6 @@ class Game {
             this.clear_last_game()
             this.countdown_to_new_game()
         }.bind(this)
-
     };
 };
 
