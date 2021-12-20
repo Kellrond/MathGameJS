@@ -21,7 +21,6 @@ const divideBtn = document.getElementById("divide-btn");
 const equalsBtn = document.getElementById("equals-btn");
 const round_scoreboard = document.getElementById("round-scoreboard");
 const correct_scoreboard = document.getElementById("correct-scoreboard");
-const wrong_scoreboard = document.getElementById("wrong-scoreboard");
 const perc_scoreboard = document.getElementById("perc-scoreboard");
 
 
@@ -91,16 +90,16 @@ class Game {
 
     disable_numeric_input = function() {
         console.log("game.disable_numeric_input")
-        oneBtn.removeAttribute("onclick");
-        twoBtn.removeAttribute("onclick");
-        threeBtn.removeAttribute("onclick");
-        fourBtn.removeAttribute("onclick");
-        fiveBtn.removeAttribute("onclick");
-        sixBtn.removeAttribute("onclick");
-        sevenBtn.removeAttribute("onclick");
-        eightBtn.removeAttribute("onclick");
-        nineBtn.removeAttribute("onclick");
-        zeroBtn.removeAttribute("onclick");
+        oneBtn.onclick = null;
+        twoBtn.onclick = null;
+        threeBtn.onclick = null;
+        fourBtn.onclick = null;
+        fiveBtn.onclick = null;
+        sixBtn.onclick = null;
+        sevenBtn.onclick = null;
+        eightBtn.onclick = null;
+        nineBtn.onclick = null;
+        zeroBtn.onclick = null;
     };
  
     add_to_buffer = function(v) {
@@ -110,7 +109,13 @@ class Game {
 
     start_game = function() {
         console.log(`--------------------------Start game. Duration: ${this.duration} ${this.duration_type}`);
+        this.clear_last_game()
         this.pick_operator()
+    };
+
+    clear_last_game = function () {
+        this.results = []
+        this.rounds_complete = 0
     };
 
     pick_operator = function() {
@@ -127,14 +132,18 @@ class Game {
 
         equalsBtn.onclick = function() {
             if (this.operators.length > 0 ) {
-                addBtn.removeAttribute("onclick");
-                subtractBtn.removeAttribute("onclick");
-                multiplybtn.removeAttribute("onclick");
-                divideBtn.removeAttribute("onclick");
                 console.log(`game.pick_operator:            ${this.operators}`)
+                this.disable_operators();
                 this.set_duration();                
             }
         }.bind(this)
+    };
+
+    disable_operators = function () {
+        addBtn.onclick = null;
+        subtractBtn.onclick = null;
+        multiplybtn.onclick = null;
+        divideBtn.onclick = null;
     };
 
     add_operator_to_list = function(op) {
@@ -146,7 +155,8 @@ class Game {
 
     set_duration = function() {
         console.log("game.set_duration");
-        equalsBtn.removeAttribute("onclick");
+        this.disable_operators()
+        addBtn.removeAttribute("onclick");
         this.window_text = "How many rounds? "
         equationWindow.innerText = this.window_text
         this.numeric_input()
@@ -183,7 +193,7 @@ class Game {
                     if (i == countdown_text.length ) {
                         setTimeout(this.start_next_round(), 1000)
                     }
-                    }.bind(this), 175 * i)
+                    }.bind(this), 150 * i)
             };
         }.bind(this), 1000);
     };
@@ -201,7 +211,6 @@ class Game {
 
         round_scoreboard.innerText = round
         correct_scoreboard.innerText = number_correct
-        wrong_scoreboard.innerText = this.rounds_complete - number_correct
         perc_scoreboard.innerText = this.rounds_complete > 0 ? number_correct / (this.rounds_complete - 0.0) : 1.0
 
     };
@@ -213,12 +222,21 @@ class Game {
     };
 
     ask_question = function() {
+        let operator_this_round = this.random_operator()
+
         this.set_new_difficulty()
+
+
         let newMaster = new QuizMaster()
-        this.round_question = newMaster.generateEquation(this.difficulty)
+        this.round_question = newMaster.generateEquation(operator_this_round, this.difficulty)
         this.window_text = this.round_question.str 
         equationWindow.innerHTML = this.window_text
         console.log(`game.ask_question:             ${this.round_question.str}`)    
+    };
+
+    random_operator = function () {
+        let random_int = parseInt(Math.random() * this.operators.length)
+        return this.operators[random_int]
     };
 
     set_new_difficulty = function() {
@@ -251,6 +269,7 @@ class Game {
             this.init()
             this.start_next_round()
         } else {
+            this.disable_numeric_input()
             this.end_game()
         }
     };
@@ -281,6 +300,12 @@ class Game {
 
     end_game = function () {
         equationWindow.innerText = `Game over ${this.count_correct()} of ${this.rounds_complete} correct`
+        equalsBtn.innerText = 'Again'
+        equalsBtn.onclick = function () {
+            this.clear_last_game()
+            this.countdown_to_new_game()
+        }.bind(this)
+
     };
 };
 
@@ -289,14 +314,14 @@ class QuizMaster {
     constructor() {
         this.x = 0,
         this.y = 0,
-        this.op = ['+'],
+        this.op = '',
         this.ans = 0,
         this.str = ""
     }
 
-    generateEquation = function(difficulty) {
+    generateEquation = function(op, difficulty) {
         console.log("quizMaster.generate_equation")
-        difficulty = 0
+        this.op = op
         this.gen_x(difficulty)
         this.gen_y(difficulty)
 
@@ -308,28 +333,49 @@ class QuizMaster {
     };
 
     rand_int = function(range) {
-        return parseInt(Math.random() * range);
+        let output = 0
+        while (output === 0) {
+            output = parseInt(Math.random() * range);
+        }
+        return output
     };
 
     gen_x = function(difficulty) {
-        while (this.x === 0){
-            this.x = this.rand_int(10 + difficulty)    
-        }  
+        if (this.op === '+') {
+            this.x = this.rand_int(difficulty)    
+        } else if (this.op === '-') {
+            while (this.x < 5) {
+                this.x = this.rand_int(difficulty)
+            }
+        } else if (this.op === '*') {
+            this.x = this.rand_int(difficulty)
+        } else if (this.op === '/') {
+            this.x = this.rand_int(difficulty / 2) * (this.rand_int(difficulty / 2) + 1)
+        };
+        
     };
 
     gen_y = function(difficulty) {
-        while (this.y === 0) {
-            this.y = this.rand_int(10 + difficulty)
-        }
+        if (this.op === '+') {
+            this.y = this.rand_int(difficulty)
+        } else if (this.op === '-') {
+            this.y = this.rand_int(this.x)
+        } else if (this.op === '*') {
+            this.y = this.rand_int(difficulty)
+        } else if (this.op === '/') {
+            while (this.x % this.y != 0 ) {
+                this.y = this.rand_int(this.x)
+            }
+        };
     };
 
     check_answer_length = function() {
-        let temp_eq_string = this.x + this.op[0] + this.y
+        let temp_eq_string = this.x + this.op + this.y
         this.ans = eval(temp_eq_string)
     };
 
     write_equation_string = function() {
-        this.str = `${this.x} ${this.op[0]} ${this.y} =&nbsp;`
+        this.str = `${this.x} ${this.op} ${this.y} =&nbsp;`
     }
 };
 
