@@ -275,7 +275,7 @@ class Game {
 
         round_scoreboard.innerText = round
         correct_scoreboard.innerText = number_correct
-        perc_scoreboard.innerText = this.rounds_complete > 0 ? number_correct / (this.rounds_complete - 0.0) : 1.0
+        perc_scoreboard.innerText = parseFloat(this.rounds_complete > 0 ? (number_correct / (this.rounds_complete - 0.0)) * 100 : 100.0).toFixed(2)+"%"
 
     };
 
