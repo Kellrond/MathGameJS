@@ -1,7 +1,7 @@
 const equationWindow = document.getElementById('equation-line');
 const newBtn = document.getElementById("new-btn");
-const durationBtn = document.getElementById("duration-btn");
-const difficultyBtn = document.getElementById("difficulty-btn");
+const clearBtn = document.getElementById("clear-btn");
+const deleteBtn = document.getElementById("delete-btn");
 const goBtn = document.getElementById("go-btn");
 const oneBtn = document.getElementById("one-btn");
 const twoBtn = document.getElementById("two-btn");
@@ -14,10 +14,6 @@ const eightBtn = document.getElementById("eight-btn");
 const nineBtn = document.getElementById("nine-btn");
 const zeroBtn = document.getElementById("zero-btn");
 const dotBtn = document.getElementById("dot-btn");
-const addBtn = document.getElementById("add-btn");
-const subtractBtn = document.getElementById("subtract-btn");
-const multiplybtn = document.getElementById("multiply-btn");
-const divideBtn = document.getElementById("divide-btn");
 const equalsBtn = document.getElementById("equals-btn");
 const round_scoreboard = document.getElementById("round-scoreboard");
 const correct_scoreboard = document.getElementById("correct-scoreboard");
@@ -67,6 +63,7 @@ class Game {
         this.results = [];
         this.window_text = ""
         this.init();
+        this.init_top_keys();
     };
     init = function () {
         this.player_input = 0
@@ -74,9 +71,48 @@ class Game {
         this.buffer_to_screen = false
     };
 
+    init_top_keys = function () {
+        newBtn.innerText = 'New'
+        clearBtn.innerText = 'Clear'
+        deleteBtn.innerText = 'Delete'
+
+        newBtn.onclick = function () { new_game.start_game() }
+        clearBtn.onclick = function () { 
+            this.buffer_input = "";
+            console.log(`window_text ${this.window_text}`)
+            equationWindow.innerHTML = this.window_text + this.buffer_input;
+        }.bind(this)
+        deleteBtn.onclick = function () {
+            this.buffer_input = this.buffer_input.slice(0, -1)
+            equationWindow.innerHTML = this.window_text + this.buffer_input
+        }.bind(this)
+    };
+
+    disable_top_keys = function () {
+        newBtn.innerText = ''
+        clearBtn.innerText = ''
+        deleteBtn.innerText = ''
+
+        newBtn.onclick = null;
+        clearBtn.onclick = null;
+        deleteBtn.onclick = null;
+    };
+
     init_numeric_input = function() {
         console.log("game.init_numeric_input")
         equalsBtn.innerText = 'Enter'
+        
+        oneBtn.innerText = 1;
+        twoBtn.innerText = 2;
+        threeBtn.innerText =3;
+        fourBtn.innerText = 4;
+        fiveBtn.innerText = 5;
+        sixBtn.innerText = 6;
+        sevenBtn.innerText = 7;
+        eightBtn.innerText = 8;
+        nineBtn.innerText = 9;
+        zeroBtn.innerText = 0;
+
         oneBtn.onclick = function () {this.add_to_buffer("1")}.bind(this);
         twoBtn.onclick = function () {this.add_to_buffer("2")}.bind(this);
         threeBtn.onclick = function () {this.add_to_buffer("3")}.bind(this);
@@ -102,6 +138,24 @@ class Game {
         nineBtn.onclick = null;
         zeroBtn.onclick = null;
     };
+
+    operator_input = function () {
+        oneBtn.innerText = "";
+        twoBtn.innerText = "-";
+        threeBtn.innerText ="";
+        fourBtn.innerText = "+";
+        fiveBtn.innerText = "";
+        sixBtn.innerText = "*";
+        sevenBtn.innerText = "";
+        eightBtn.innerText = "/";
+        nineBtn.innerText = "";
+        zeroBtn.innerText = "";
+
+        fourBtn.onclick = function() { this.add_operator_to_list('+') }.bind(this);
+        twoBtn.onclick = function() { this.add_operator_to_list('-') }.bind(this);
+        sixBtn.onclick = function() { this.add_operator_to_list('*') }.bind(this);
+        eightBtn.onclick = function() { this.add_operator_to_list('/') }.bind(this);
+    }
  
     add_to_buffer = function(v) {
         this.buffer_input += v
@@ -117,6 +171,7 @@ class Game {
     clear_last_game = function () {
         this.results = []
         this.rounds_complete = 0
+        this.init()
     };
 
     pick_operator = function() {
@@ -126,14 +181,11 @@ class Game {
         equationWindow.innerText = this.window_text
         equalsBtn.innerText = "Enter"
 
-        addBtn.onclick = function() { this.add_operator_to_list('+') }.bind(this);
-        subtractBtn.onclick = function() { this.add_operator_to_list('-') }.bind(this);
-        multiplybtn.onclick = function() { this.add_operator_to_list('*') }.bind(this);
-        divideBtn.onclick = function() { this.add_operator_to_list('/') }.bind(this);
+        this.operator_input();
 
         equalsBtn.onclick = function() {
-            if (this.operators.length > 0 ) {
-                console.log(`game.pick_operator:            ${this.operators}`)
+            if (this.buffer_input.length > 0 ) {
+                this.write_buffer_to_operators();
                 this.disable_operators();
                 this.set_duration();                
             }
@@ -141,23 +193,33 @@ class Game {
     };
 
     disable_operators = function () {
-        addBtn.onclick = null;
-        subtractBtn.onclick = null;
-        multiplybtn.onclick = null;
-        divideBtn.onclick = null;
+        fourBtn.onclick = null
+        twoBtn.onclick = null
+        sixBtn.onclick = null
+        eightBtn.onclick = null;
     };
 
     add_operator_to_list = function(op) {
-        if (this.operators.find(element => element == op ) == undefined) {
-            this.operators.push(op)            
+        if (!this.buffer_input.includes(op)) {
+            this.buffer_input += op            
+        } else {
+            this.buffer_input.split(op).join('')
         }
-        equationWindow.innerText = this.window_text + " " + this.operators.join("")
+        equationWindow.innerText = this.window_text + " " + this.buffer_input
+    };
+
+    write_buffer_to_operators = function () {
+        for (let i = 0;i < this.buffer_input.length; i++) {
+            this.operators.push(this.buffer_input.charAt(i))
+        }; 
+        this.buffer_input = ""
+        console.log(`game.write_buffer_to_operators:${this.operators}`)
+
     };
 
     set_duration = function() {
         console.log("game.set_duration");
         this.disable_operators()
-        addBtn.removeAttribute("onclick");
         this.window_text = "How many rounds? "
         equationWindow.innerText = this.window_text
         this.numeric_input()
@@ -170,7 +232,6 @@ class Game {
                 this.countdown_to_new_game()                
             }
         }.bind(this);
-
     };
 
     numeric_input = function () {
@@ -377,7 +438,13 @@ class QuizMaster {
     };
 
     write_equation_string = function() {
-        this.str = `${this.x} ${this.op} ${this.y} =&nbsp;`
+        let this_op = this.op
+        if (this.op == '*') {
+            this_op = 'x'
+        } else if (this.op == '/') {
+            this_op = '÷'
+        }
+        this.str = `${this.x} ${this_op} ${this.y} =&nbsp;`
     }
 };
 
@@ -385,7 +452,5 @@ class QuizMaster {
 let new_game = new Game();
 new_game.start_game()
 
-newBtn.onclick = function() {
-    new_game.start_game()
-}
+
 
